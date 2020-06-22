@@ -1,4 +1,4 @@
-module github.com/sheenam3/cui
+module github.com/sheenam3/x-tracer-cui
 
 go 1.14
 
