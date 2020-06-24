@@ -20,6 +20,7 @@ var keys []Key = []Key{
 	Key{"pods", gocui.KeyCtrlN, actionGlobalToggleViewNamespaces},
 	Key{"pods", gocui.KeyArrowUp, actionViewPodsUp},
 	Key{"pods", gocui.KeyArrowDown, actionViewPodsDown},
+	Key{"pods", gocui.KeyEnter, actionViewPodsSelect},
 	//Key{"pods", 'd', actionViewPodsDelete},
 	//Key{"pods", 'l', actionViewPodsLogs},
 	//Key{"logs", 'l', actionViewPodsLogsHide},
@@ -47,7 +48,6 @@ func main() {
 		os.Exit(0)
 	}
 
-	fmt.Print("HI")
 	// Only used to check errors
 	getClientSet()
 
@@ -76,7 +76,7 @@ func uiLayout(g *gocui.Gui) error {
 	maxX, maxY := g.Size()
 
 //	viewDebug(g, maxX, maxY)
-//	viewLogs(g, maxX, maxY)
+	viewLogs(g, maxX, maxY)
 	viewInfo(g,maxX,maxY)
 	viewNamespaces(g, maxX, maxY)
 	viewOverlay(g, maxX, maxY)
@@ -191,6 +191,76 @@ func getSelectedPod(g *gocui.Gui) (string, error) {
 	p := getPodNameFromLine(l)
 
 	return p, nil
+}
+
+
+
+//Get Host Name
+func getHostName() string {
+	name, err := os.Hostname()
+	if err != nil {
+		panic(err)
+	}
+	log.Println("Hostname : ", name)
+	return name
+}
+
+func showViewPodsLogs(g *gocui.Gui) error {
+	vn := "logs"
+
+	switch LOG_MOD {
+	case "pod":
+		// Get current selected pod
+		p, err := getSelectedPod(g)
+		if err != nil {
+			return err
+		}
+
+		// Display pod containers
+		vLc, err := g.View(vn + "-containers")
+		if err != nil {
+			return err
+		}
+		vLc.Clear()
+
+		var conName []string
+		for _, c := range getPodContainers(p) {
+			fmt.Fprintln(vLc, c)
+			conName = append(conName, c)
+		}
+		vLc.SetCursor(0, 0)
+
+
+  	        //Display Container IDs
+		lv, err := g.View(vn)
+		if err != nil {
+                        return err
+                }
+		lv.Clear()
+
+		fmt.Fprintln(lv, "Containers ID are:")
+		for i, conId := range getPodContainersID(p){
+			fmt.Fprintln(lv, conName[i] + "->" + conId)
+
+		}
+
+
+	       
+
+		
+
+		// Display logs
+		//refreshPodsLogs(g)
+	}
+
+	
+
+//	debug(g, "Action: Show view logs")
+	g.SetViewOnTop(vn)
+	g.SetViewOnTop(vn + "-containers")
+	g.SetCurrentView(vn)
+
+	return nil
 }
 
 

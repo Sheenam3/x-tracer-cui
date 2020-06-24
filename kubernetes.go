@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	//"io"
-
+	"reflect"
 	"strconv"
 	"time"
 	"os"
@@ -37,6 +38,12 @@ func getClientSet() *kubernetes.Clientset {
 	return cs
 }
 
+//Get Field String
+func getFieldString(e *v1.ContainerStatus, field string) string {
+        r := reflect.ValueOf(e)
+        f := reflect.Indirect(r).FieldByName(field)
+        return f.String()
+}
 
 
 // Get pods (use namespace)
@@ -54,6 +61,33 @@ func getNamespaces() (*v1.NamespaceList, error) {
 }
 
 
+// Get the pod containers
+func getPodContainers(p string) []string {
+	var pc []string
+	cs := getClientSet()
+
+	pod, _ := cs.CoreV1().Pods(NAMESPACE).Get(p, metav1.GetOptions{})
+	for _, c := range pod.Spec.Containers {
+		pc = append(pc, c.Name)
+	}
+
+	return pc
+}
+
+//Get Pod container ID
+func getPodContainersID(p string) []string {
+        cs := getClientSet()
+	var id []string
+        podObj, _ := cs.CoreV1().Pods(NAMESPACE).Get(p, metav1.GetOptions{})
+
+	var conId string
+               for c := range podObj.Status.ContainerStatuses {
+                       conId = getFieldString(&podObj.Status.ContainerStatuses[c], "ContainerID")
+                       conId = strings.SplitAfter(conId, "://")[1]
+                       id = append(id, conId) 
+               }
+        return id
+}
 
 
 

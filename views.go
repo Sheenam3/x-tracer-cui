@@ -37,6 +37,7 @@ func viewTitle(g *gocui.Gui, lMaxX int, lMaxY int) error {
 
 		// Content
 		fmt.Fprintln(v, versionTitle(lMaxX))
+		
 	}
 
 	return nil
@@ -46,29 +47,64 @@ func viewTitle(g *gocui.Gui, lMaxX int, lMaxY int) error {
 //View: Information
 
 func viewInfo(g *gocui.Gui, lMaxX int, lMaxY int) error {
-	if v, err := g.SetView("info",-1,2,lMaxX,3); err != nil {
+	if v, err := g.SetView("info",9,lMaxY-3,lMaxX,lMaxY-1); err != nil {
                 if err != gocui.ErrUnknownView {
                         return err
                 }
 
 		//settings
-                v.Title = "Information"
+                
 		v.Frame = true
 		v.BgColor = gocui.ColorDefault | gocui.AttrReverse
                 v.FgColor = gocui.ColorDefault | gocui.AttrReverse
-
+		fmt.Fprintln(v, strings.Repeat("─", lMaxX))
+		
 		//content
-		fmt.Fprintln(v, info())
+		fmt.Fprintln(v, textPadCenter("hello", lMaxX))	
+		g.SetCurrentView(v.Name())
+	        //fmt.Fprintln(v, info())
 	}
 
 	return nil
 }
-
+/*
 func info() string{
 
 return fmt.Sprintf("fuckoff")
 }
+*/
 
+
+
+func viewLogs(g *gocui.Gui, lMaxX int, lMaxY int) error {
+	if v, err := g.SetView("logs", 2, 2, lMaxX-4, lMaxY-2); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+
+		// Settings
+		v.Title = " Logs "
+		v.Autoscroll = true
+	}
+
+	// Containers view
+	minX := int(lMaxX/5) * 4
+	minY := 2
+	maxX := lMaxX - 4
+	maxY := int(lMaxY / 5)
+	if v, err := g.SetView("logs-containers", minX, minY, maxX, maxY); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+
+		// Settings
+		v.Frame = true
+		v.BgColor = gocui.ColorBlack
+		v.Highlight = true
+	}
+
+	return nil
+}
 
 // View: Namespace
 func viewNamespaces(g *gocui.Gui, lMaxX int, lMaxY int) error {
@@ -138,13 +174,14 @@ func viewNamespacesRefreshList(g *gocui.Gui) {
 
 // View: Pods
 func viewPods(g *gocui.Gui, lMaxX int, lMaxY int) error {
-	if v, err := g.SetView("pods", -1, 3, lMaxX, lMaxY-1); err != nil {
+	if v, err := g.SetView("pods", -1, 5, lMaxX, lMaxY-1); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 
 		// Settings
 		v.Frame = true
+		v.Title = " Pods "
 		v.Highlight = true
 		v.SelBgColor = gocui.ColorGreen
 		v.SelFgColor = gocui.ColorBlack

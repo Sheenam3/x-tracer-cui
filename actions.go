@@ -66,7 +66,21 @@ func actionViewPodsDown(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+func actionViewPodsSelect(g *gocui.Gui, v *gocui.View) error {
+	line,err  := getViewLine(g,v)
+	if err != nil {
+		return err
+	}
+//	maxX, maxY := g.Size()	
+	LOG_MOD = "pod"
+	errr := showViewPodsLogs(g)
 
+	changeStatusContext(g, "SL")
+//	viewLogs(g, maxX, maxY)
+	displayConfirmation(g, line+" Pod selected")
+	return errr
+
+}
 
 // View namespaces: Up
 func actionViewNamespacesUp(g *gocui.Gui, v *gocui.View) error {
